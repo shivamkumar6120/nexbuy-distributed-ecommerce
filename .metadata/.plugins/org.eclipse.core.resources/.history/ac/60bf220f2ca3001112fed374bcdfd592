@@ -1,0 +1,13 @@
+package com.nexbuy.auth.services;
+
+import org.springframework.stereotype.Service;
+
+import com.nexbuy.auth.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class AuthServiceImpl implements AuthService {
+	public final UserRepository userRepository;
+}

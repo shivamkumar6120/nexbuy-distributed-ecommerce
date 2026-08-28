@@ -1,0 +1,12 @@
+package com.nexbuy.auth.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.nexbuy.auth.entity.User;
+
+//	JpaRepository<Entity, PrimaryKeyType> User     → Entity || Long     → User's ID type
+public interface UserRepository extends JpaRepository<User, Long>{
+	
+	boolean existsByEmail();
+
+}

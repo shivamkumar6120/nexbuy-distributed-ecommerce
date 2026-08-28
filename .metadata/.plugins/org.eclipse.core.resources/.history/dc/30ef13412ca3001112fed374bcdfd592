@@ -1,0 +1,5 @@
+package com.nexbuy.auth.services;
+
+public interface AuthService {
+
+}
