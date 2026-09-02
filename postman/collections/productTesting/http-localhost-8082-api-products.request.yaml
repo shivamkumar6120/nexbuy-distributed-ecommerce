@@ -1,0 +1,23 @@
+$kind: http-request
+name: http://localhost:8082/api/products
+description: ""
+url: http://localhost:8082/api/products
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"iPhone 18\",\r
+
+    \    \"description\": \"Apple smartphone\",\r
+
+    \    \"price\": 99999.00,\r
+
+    \    \"category\": \"ELECTRONICS\",\r
+
+    \    \"stockQuantity\": 20,\r
+
+    \    \"createdAt\": \"2026-09-02T16:00:00\"\r
+
+    }"
+order: 1788263819009

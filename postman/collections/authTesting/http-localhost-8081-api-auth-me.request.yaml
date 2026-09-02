@@ -1,0 +1,10 @@
+$kind: http-request
+name: http://localhost:8081/api/auth/me
+description: ""
+url: http://localhost:8081/api/auth/me
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_09zw}}"
+order: 1399396965585155
