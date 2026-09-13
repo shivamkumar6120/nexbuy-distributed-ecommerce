@@ -1,5 +1,0 @@
-package com.nexbuy.auth.exception;
-
-public class ErrorRespone {
-
-}

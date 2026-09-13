@@ -7,7 +7,9 @@ import org.springframework.stereotype.Service;
 
 import com.nexbuy.product.dto.ProductRequest;
 import com.nexbuy.product.dto.ProductResponse;
+import com.nexbuy.product.entity.Category;
 import com.nexbuy.product.entity.Product;
+import com.nexbuy.product.exception.InsufficientStockException;
 import com.nexbuy.product.exception.ProductNotFoundException;
 import com.nexbuy.product.repository.ProductRepository;
 
@@ -69,10 +71,53 @@ public class ProductServiceImpl implements ProductService {
 
 	@Override
 	public void deleteProduct(Long id) {
-		Product product = productRepository
-						.findById(id)
-						.orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+		Product product = productRepository.findById(id)
+				.orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
 		productRepository.delete(product);
+	}
+
+	@Override
+	public List<ProductResponse> searchProducts(String name, Category category) {
+
+		List<Product> products;
+		if (name != null && category != null) {
+			products = productRepository.findByNameContainingIgnoreCase(name).stream()
+					.filter(product -> product.getCategory() == category).toList();
+		} else if (name != null) {
+			products = productRepository.findByNameContainingIgnoreCase(name);
+		} else if (category != null) {
+			products = productRepository.findByCategory(category);
+		} else {
+			products = productRepository.findAll();
+		}
+		return products.stream().map(this::toResponse).toList();
+	}
+
+	@Override
+	public ProductResponse getStock(Long id) {
+		Product product = productRepository.findById(id)
+				.orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+		return toResponse(product);
+	}
+
+	@Override
+	public ProductResponse reduceStock(Long id, Integer quantity) {
+		Product product = productRepository.findById(id)
+				.orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+		if (product.getStockQuantity() < quantity) {
+			throw new InsufficientStockException("Insufficient stock for product id: " + id);
+		}
+
+		product.setStockQuantity(product.getStockQuantity() - quantity);
+		return toResponse(productRepository.save(product));
+	}
+
+	@Override
+	public ProductResponse increaseStock(Long id, Integer quantity) {
+		Product product = productRepository.findById(id)
+				.orElseThrow(() -> new ProductNotFoundException("Product not found with id: " + id));
+		product.setStockQuantity(product.getStockQuantity() + quantity);
+		return toResponse(productRepository.save(product));
 	}
 
 }

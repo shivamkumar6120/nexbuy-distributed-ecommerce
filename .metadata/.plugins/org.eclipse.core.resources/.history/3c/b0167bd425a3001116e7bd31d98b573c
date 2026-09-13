@@ -1,8 +1,0 @@
-package com.nexbuy.auth.exception;
-
-public class EmailAlreadyExistsException extends RuntimeException{
-	
-	public  EmailEmailAlreadyExistsException(String message) {
-		super(message);
-	}
-}

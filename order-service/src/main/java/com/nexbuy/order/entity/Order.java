@@ -1,9 +1,8 @@
-package com.nexbuy.product.entity;
+package com.nexbuy.order.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,22 +16,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "products")
-@Getter
+@Table(name = "orders")
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
+public class Order {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String name;
-	private String description;
-	private BigDecimal price;
+
+	private String userEmail;
+
+	private BigDecimal totalAmount;
 
 	@Enumerated(EnumType.STRING)
-	private Category category;
-	private Integer stockQuantity;
+	private OrderStatus status;
 	private LocalDateTime createdAt;
+
 }

@@ -3,7 +3,6 @@
 # ==============================
 *.class
 folder_structure.txt
-.cursor/
 
 # ==============================
 # Maven
@@ -19,11 +18,14 @@ target/
 # ==============================
 # IDE - Eclipse / STS
 # ==============================
+.metadata/
 .classpath
 .project
 .settings/
 .factorypath
 .springBeans
+bin/
+tmp/
 
 # ==============================
 # IntelliJ IDEA
@@ -35,15 +37,33 @@ target/
 out/
 
 # ==============================
-# VS Code
+# VS Code / Cursor
 # ==============================
 .vscode/
+.cursor/
+.cursorignore
+
+# ==============================
+# Postman / API client
+# ==============================
+postman/
+.postman/
+.Postman/
+**/postman/
+**/.postman/
+*.postman_collection.json
+*.postman_environment.json
+*.postman_workspace.json
+*.postman_globals.json
+*.postman_dump.json
 
 # ==============================
 # OS generated files
 # ==============================
 .DS_Store
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # ==============================
 # Environment / Secrets
@@ -69,4 +89,4 @@ logs/
 # ==============================
 *.tmp
 *.temp
-/.metadata/
+
