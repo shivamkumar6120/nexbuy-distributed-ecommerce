@@ -5,10 +5,13 @@ import java.time.LocalDateTime;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.nexbuy.payment.client.NotificationClient;
 import com.nexbuy.payment.client.OrderClient;
+import com.nexbuy.payment.dto.NotificationRequest;
 import com.nexbuy.payment.dto.OrderResponse;
 import com.nexbuy.payment.dto.PaymentRequest;
 import com.nexbuy.payment.dto.PaymentResponse;
+import com.nexbuy.payment.entity.NotificationType;
 import com.nexbuy.payment.entity.Payment;
 import com.nexbuy.payment.entity.PaymentStatus;
 import com.nexbuy.payment.exception.OrderNotFoundException;
@@ -25,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final PaymentRepository paymentRepository;
 	private final OrderClient orderClient;
+	private final NotificationClient notificationClient;
 
 	@Override
 	public PaymentResponse processPayment(PaymentRequest request) {
@@ -73,6 +77,17 @@ public class PaymentServiceImpl implements PaymentService {
 		Payment savedPayment = paymentRepository.save(payment);
 
 		orderClient.confirmOrder(order.getId());
+		
+		NotificationRequest notificationRequest =
+		        new NotificationRequest(
+		                order.getId(),
+		                NotificationType.EMAIL,
+		                "Payment successful for Order #"
+		                        + order.getId()
+		        );
+
+		notificationClient.sendNotification(
+		        notificationRequest);
 
 		return toResponse(savedPayment);
 	}
