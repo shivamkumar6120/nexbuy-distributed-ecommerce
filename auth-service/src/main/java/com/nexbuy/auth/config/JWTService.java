@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JWTService {
 
-	private final String SECRET_KEY = "lkshfuhfhkfnhsflw0812@#$!^&@$&koAsSELIn";
+	private final String SECRET_KEY = "nexbuy-secret-key-12345678901234567890";
 
 	private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 

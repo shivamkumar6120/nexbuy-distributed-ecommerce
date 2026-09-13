@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.nexbuy.order.client.ProductClient;
@@ -18,7 +19,9 @@ import com.nexbuy.order.entity.Order;
 import com.nexbuy.order.entity.OrderItem;
 import com.nexbuy.order.entity.OrderStatus;
 import com.nexbuy.order.exception.InsufficientStockException;
+import com.nexbuy.order.exception.InvalidOrderStatusException;
 import com.nexbuy.order.exception.OrderNotFoundException;
+import com.nexbuy.order.exception.UnauthorizedOrderAccessException;
 import com.nexbuy.order.repository.OrderRepository;
 
 import lombok.AllArgsConstructor;
@@ -54,7 +57,8 @@ public class OrderServiceImpl implements OrderService {
 		// 2. Create Order only after stock validation
 		Order order = new Order();
 
-		order.setUserEmail("customer@example.com");
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		order.setUserEmail(email);
 		order.setStatus(OrderStatus.CREATED);
 		order.setCreatedAt(LocalDateTime.now());
 
@@ -98,36 +102,88 @@ public class OrderServiceImpl implements OrderService {
 
 	@Override
 	public OrderResponse getOrderById(Long id) {
+
 		Order order = orderRepository.findById(id)
-	            .orElseThrow(() ->
-	                    new OrderNotFoundException(
-	                            "Order not found with id: " + id));
-		List<OrderItem> items = 
-				orderItemRepository.findByOrderId(id);
-		
-		List<OrderItemResponse> itemResponse = items
-											.stream()
-											.map(item -> new OrderItemResponse(
-													item.getProductId(),
-													item.getQuantity(),
-													item.getPrice()))
-											.toList();
-		
-		
-		return new OrderResponse(
-				order.getId(), 
-				order.getUserEmail(), 
-				order.getTotalAmount(), 
-				order.getStatus(),
-				order.getCreatedAt(), 
-				itemResponse);
+				.orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
+
+		String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+		if (!order.getUserEmail().equals(userEmail)) {
+			throw new UnauthorizedOrderAccessException("You are not allowed to access this order");
+		}
+
+		List<OrderItem> items = orderItemRepository.findByOrderId(id);
+
+		List<OrderItemResponse> itemResponses = items.stream()
+				.map(item -> new OrderItemResponse(item.getProductId(), item.getQuantity(), item.getPrice())).toList();
+
+		return new OrderResponse(order.getId(), order.getUserEmail(), order.getTotalAmount(), order.getStatus(),
+				order.getCreatedAt(), itemResponses);
+	}
+
+	@Override
+	public List<OrderResponse> getAllOrders() {
+		List<Order> orders = orderRepository.findAll();
+
+		return orders.stream().map(order -> {
+			List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+			List<OrderItemResponse> itemResponses = items.stream()
+					.map(item -> new OrderItemResponse(item.getProductId(), item.getQuantity(), item.getPrice()))
+					.toList();
+			return new OrderResponse(order.getId(), order.getUserEmail(), order.getTotalAmount(), order.getStatus(),
+					order.getCreatedAt(), itemResponses);
+		}).toList();
+	}
+
+	@Override
+	public void updateOrderStatus(Long id, OrderStatus status) {
+
+		Order order = orderRepository.findById(id)
+				.orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
+
+		String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+		if (!order.getUserEmail().equals(userEmail)) {
+			throw new UnauthorizedOrderAccessException("You are not allowed to modify this order");
+		}
+
+		if (order.getStatus() != OrderStatus.CREATED) {
+			throw new InvalidOrderStatusException("Order status cannot be changed from " + order.getStatus());
+		}
+
+		if (status == OrderStatus.CANCELLED) {
+
+			List<OrderItem> items = orderItemRepository.findByOrderId(id);
+
+			for (OrderItem item : items) {
+
+				productClient.increaseStock(item.getProductId(), item.getQuantity());
+			}
+		}
+
+		order.setStatus(status);
+
+		orderRepository.save(order);
+	}
+
+	@Override
+	public List<OrderResponse> getMyOrders() {
+
+		String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+		List<Order> orders = orderRepository.findByUserEmail(userEmail);
+
+		return orders.stream().map(order -> {
+
+			List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+
+			List<OrderItemResponse> itemResponses = items.stream()
+					.map(item -> new OrderItemResponse(item.getProductId(), item.getQuantity(), item.getPrice()))
+					.toList();
+
+			return new OrderResponse(order.getId(), order.getUserEmail(), order.getTotalAmount(), order.getStatus(),
+					order.getCreatedAt(), itemResponses);
+		}).toList();
 	}
 
 }
-
-
-
-
-
-
-

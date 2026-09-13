@@ -1,11 +1,13 @@
 package com.nexbuy.order.client;
 
+import com.nexbuy.order.exception.GlobalExceptionHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import com.nexbuy.order.dto.ProductResponse;
 
 import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 @Component // Spring says: I need to create a ProductClient object.
 
@@ -27,18 +29,16 @@ public class ProductClient {
 	private final RestClient restClient; // ProductClient needs a RestClient.
 
 	public ProductResponse getProductById(Long productId) {
-		return restClient.get()
-				.uri("/api/products/{id}", productId)
-				.retrieve()
-				.body(ProductResponse.class);
-	}
-	
-	public ProductResponse reduceStock(Long productId, Integer quantity) {
-		return restClient
-				.put()
-				.uri("/api/products/{id}/stock/reduce?quantity={quantity}", productId, quantity)
-				.retrieve()
-				.body(ProductResponse.class);
+		return restClient.get().uri("/api/products/{id}", productId).retrieve().body(ProductResponse.class);
 	}
 
+	public ProductResponse reduceStock(Long productId, Integer quantity) {
+		return restClient.put().uri("/api/products/{id}/stock/reduce?quantity={quantity}", productId, quantity)
+				.retrieve().body(ProductResponse.class);
+	}
+
+	public ProductResponse increaseStock(Long productId, Integer quantity) {
+		return restClient.put().uri("/api/products/{id}/stock/increase?quantity={quantity}", productId, quantity)
+				.retrieve().body(ProductResponse.class);
+	}
 }

@@ -42,6 +42,39 @@ public class GlobalExceptionHandler {
 				.body(error);
 	}
 	
+	@ExceptionHandler(InvalidOrderStatusException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidOrderStatus(
+			InvalidOrderStatusException ex,
+	        HttpServletRequest request){
+		ErrorResponse error = new ErrorResponse( LocalDateTime.now(),
+	            HttpStatus.BAD_REQUEST.value(),
+	            "Invalid Order Status",
+	            ex.getMessage(),
+	            request.getRequestURI());
+		
+		
+		return ResponseEntity
+				.status(HttpStatus.BAD_REQUEST)
+				.body(error);
+	}
+	
+	@ExceptionHandler(UnauthorizedOrderAccessException.class)
+	public ResponseEntity<ErrorResponse> handleUnauthorizedOrderAccess(
+	        UnauthorizedOrderAccessException ex,
+	        HttpServletRequest request) {
+
+	    ErrorResponse error = new ErrorResponse(
+	            LocalDateTime.now(),
+	            HttpStatus.FORBIDDEN.value(),
+	            "Forbidden",
+	            ex.getMessage(),
+	            request.getRequestURI()
+	    );
+
+	    return ResponseEntity
+	            .status(HttpStatus.FORBIDDEN)
+	            .body(error);
+	}
 	
 }
 
